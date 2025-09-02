@@ -9,6 +9,9 @@ import { translateText } from '@/ai/flows/translate-text';
 import type { TranslateTextOutput } from '@/ai/flows/translate-text';
 import { cookingCoach } from '@/ai/flows/cooking-coach';
 import type { CookingCoachOutput } from '@/ai/flows/cooking-coach';
+import { familyMealAnalysis } from '@/ai/flows/family-meal-analysis';
+import type { FamilyMealAnalysisInput, FamilyMealAnalysisOutput } from '@/ai/flows/family-meal-analysis';
+
 
 type DietaryPreference = "veg" | "eggetarian" | "non-veg";
 
@@ -89,5 +92,22 @@ export async function handleCookingCoach(mealDescription: string, dietaryPrefere
     } catch (error) {
         console.error('Error getting cooking tips:', error);
         throw new Error('Failed to get cooking tips. The AI model might be busy. Please try again later.');
+    }
+}
+
+export async function handleFamilyMealAnalysis(input: FamilyMealAnalysisInput): Promise<FamilyMealAnalysisOutput> {
+    if (!input.photoDataUri) {
+        throw new Error('Image data is missing.');
+    }
+    if (!input.familyMembers || input.familyMembers.length === 0) {
+        throw new Error('Family members are missing.');
+    }
+
+    try {
+        const result = await familyMealAnalysis(input);
+        return result;
+    } catch (error) {
+        console.error('Error analyzing family meal:', error);
+        throw new Error('Failed to analyze family meal. The AI model might be busy. Please try again later.');
     }
 }

@@ -7,3 +7,4 @@ import '@/ai/flows/suggest-protein-upgrades-for-veg-flow.ts';
 import '@/ai/flows/text-to-speech.ts';
 import '@/ai/flows/translate-text.ts';
 import '@/ai/flows/cooking-coach.ts';
+import '@/ai/flows/family-meal-analysis.ts';
