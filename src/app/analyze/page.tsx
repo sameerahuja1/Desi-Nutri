@@ -2,18 +2,30 @@
 
 import React, { useState, useMemo, useRef } from 'react';
 import Image from 'next/image';
-import { Camera, Upload, Loader2, Share2, ClipboardList, Lightbulb, RefreshCw, XCircle, Volume2, PlayCircle, Leaf, Egg, Beef } from 'lucide-react';
+import { Camera, Upload, Loader2, Share2, ClipboardList, Lightbulb, RefreshCw, XCircle, Volume2, PlayCircle, Leaf, Egg, Beef, ArrowRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { handleAnalyzeMeal, handleTextToSpeech } from '../actions';
 import type { AnalyzeMealPhotoAndSuggestProteinOutput } from '@/ai/flows/analyze-meal-photo-and-suggest-protein';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 
 type DietaryPreference = "veg" | "eggetarian" | "non-veg";
+
+const MacroBar = ({ label, value, total, colorClass }: { label: string, value: number, total: number, colorClass: string }) => (
+    <div>
+        <div className="flex justify-between mb-1">
+            <span className="font-medium">{label}</span>
+            <span className={`font-bold ${colorClass.replace('bg-', 'text-')}`}>{value || 0}g</span>
+        </div>
+        <Progress value={total > 0 ? ((value || 0) / total) * 100 : 0} className={`h-3 [&>div]:${colorClass}`} />
+    </div>
+);
+
 
 export default function AnalyzePage() {
   const [file, setFile] = useState<File | null>(null);
@@ -117,14 +129,14 @@ export default function AnalyzePage() {
 
   const shareOnWhatsApp = () => {
     if (!analysis || !parsedMacros) return;
-    const summary = `My ${analysis.mealName} has approx. ${parsedMacros.calories} calories!\n- Protein: ${parsedMacros.protein}g\n- Carbs: ${parsedMacros.carbs}g\n- Fat: ${parsedMacros.fat}g\n\nUpgrade Suggestions:\n${analysis.proteinUpgradeSuggestions.join('\n')}\n\nAnalyzed with DesiNutri!`;
+    const summary = `My ${analysis.mealName} has approx. ${parsedMacros.calories} calories!\n- Protein: ${parsedMacros.protein}g\n- Carbs: ${parsedMacros.carbs}g\n- Fat: ${parsedMacros.fat}g\n\nUpgrade Suggestions:\n${analysis.proteinUpgradeSuggestions.map(s => s.suggestion).join('\n')}\n\nAnalyzed with DesiNutri!`;
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(summary)}`;
     window.open(whatsappUrl, '_blank');
   };
 
   const generateShoppingList = () => {
     if (!analysis) return;
-    const list = analysis.proteinUpgradeSuggestions.join('\n');
+    const list = analysis.proteinUpgradeSuggestions.map(s => s.suggestion).join('\n');
     navigator.clipboard.writeText(list).then(() => {
       toast({
         title: "Shopping list copied!",
@@ -147,7 +159,7 @@ export default function AnalyzePage() {
     setIsGeneratingAudio(true);
     setAudioUrl(null); // Reset previous audio
     try {
-      const reportText = `Your meal is ${analysis.mealName}. It has approximately ${parsedMacros.calories} calories. Macros are: ${parsedMacros.protein} grams of protein, ${parsedMacros.carbs} grams of carbohydrates, and ${parsedMacros.fat} grams of fat. Here are some protein upgrade suggestions: ${analysis.proteinUpgradeSuggestions.join(', ')}.`;
+      const reportText = `Your meal is ${analysis.mealName}. It has approximately ${parsedMacros.calories} calories. Macros are: ${parsedMacros.protein} grams of protein, ${parsedMacros.carbs} grams of carbohydrates, and ${parsedMacros.fat} grams of fat. Here are some protein upgrade suggestions: ${analysis.proteinUpgradeSuggestions.map(s => s.suggestion).join(', ')}.`;
       const result = await handleTextToSpeech(reportText);
       setAudioUrl(result.media);
       toast({
@@ -290,27 +302,10 @@ export default function AnalyzePage() {
                 <CardDescription>Estimated values for your meal. Total: ~{parsedMacros.calories} kcal</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="font-medium">Protein</span>
-                    <span className="font-bold text-primary">{parsedMacros.protein || 0}g</span>
-                  </div>
-                  <Progress value={totalMacros > 0 ? ((parsedMacros.protein || 0) / totalMacros) * 100 : 0} className="h-3 [&>div]:bg-primary" />
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="font-medium">Carbohydrates</span>
-                    <span className="font-bold text-yellow-500">{parsedMacros.carbs || 0}g</span>
-                  </div>
-                  <Progress value={totalMacros > 0 ? ((parsedMacros.carbs || 0) / totalMacros) * 100 : 0} className="h-3 [&>div]:bg-yellow-500" />
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="font-medium">Fat</span>
-                    <span className="font-bold text-red-500">{parsedMacros.fat || 0}g</span>
-                  </div>
-                  <Progress value={totalMacros > 0 ? ((parsedMacros.fat || 0) / totalMacros) * 100 : 0} className="h-3 [&>div]:bg-red-500" />
-                </div>
+                <MacroBar label="Protein" value={parsedMacros.protein} total={totalMacros} colorClass="bg-primary" />
+                <MacroBar label="Carbohydrates" value={parsedMacros.carbs} total={totalMacros} colorClass="bg-yellow-500" />
+                <MacroBar label="Fat" value={parsedMacros.fat} total={totalMacros} colorClass="bg-red-500" />
+                
                 {(parsedMacros.protein || 0) < 15 && <Alert className="mt-4 border-primary/50 text-primary">
                   <Lightbulb className="h-4 w-4" />
                   <AlertTitle>Needs Attention: Protein Boost Needed!</AlertTitle>
@@ -331,19 +326,42 @@ export default function AnalyzePage() {
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle>Quick Protein Upgrades</CardTitle>
-              <CardDescription>Easy, actionable ways to boost your meal with local Indian ingredients.</CardDescription>
+              <CardDescription>See how easy it is to boost your meal's protein with these suggestions.</CardDescription>
             </CardHeader>
-            <CardContent className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {analysis.proteinUpgradeSuggestions.map((suggestion, index) => (
-                <Card key={index} className="bg-green-50/50 border-green-200 flex flex-col">
-                    <CardHeader className="flex-grow">
-                        <CardTitle className="flex items-start gap-3">
-                           <Lightbulb className="h-8 w-8 text-green-600 flex-shrink-0 mt-1" />
-                           <span className="text-base font-medium">{suggestion}</span>
-                        </CardTitle>
-                    </CardHeader>
-                </Card>
-              ))}
+            <CardContent className="space-y-4">
+              {analysis.proteinUpgradeSuggestions.map((suggestion, index) => {
+                const newMacros = {
+                    protein: (parsedMacros.protein || 0) + suggestion.proteinGrams,
+                    carbs: (parsedMacros.carbs || 0) + suggestion.carbGrams,
+                    fat: (parsedMacros.fat || 0) + suggestion.fatGrams,
+                };
+                const newTotalMacros = newMacros.protein + newMacros.carbs + newMacros.fat;
+
+                return (
+                    <Card key={index} className="bg-green-50/50 border-green-200">
+                        <CardHeader>
+                            <CardTitle className="flex items-start gap-3">
+                               <Lightbulb className="h-8 w-8 text-green-600 flex-shrink-0 mt-1" />
+                               <span className="text-lg font-semibold">{suggestion.suggestion}</span>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid md:grid-cols-2 gap-6 items-center">
+                            <div className="space-y-3">
+                                <p className="font-semibold text-center text-muted-foreground">Before</p>
+                                <MacroBar label="Protein" value={parsedMacros.protein} total={totalMacros} colorClass="bg-primary" />
+                                <MacroBar label="Carbs" value={parsedMacros.carbs} total={totalMacros} colorClass="bg-yellow-500" />
+                                <MacroBar label="Fat" value={parsedMacros.fat} total={totalMacros} colorClass="bg-red-500" />
+                            </div>
+                             <div className="space-y-3">
+                                <p className="font-semibold text-center text-muted-foreground">After</p>
+                                <MacroBar label="Protein" value={newMacros.protein} total={newTotalMacros} colorClass="bg-primary" />
+                                <MacroBar label="Carbs" value={newMacros.carbs} total={newTotalMacros} colorClass="bg-yellow-500" />
+                                <MacroBar label="Fat" value={newMacros.fat} total={newTotalMacros} colorClass="bg-red-500" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                )
+              })}
             </CardContent>
           </Card>
 

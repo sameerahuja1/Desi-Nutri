@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import type { Suggestion } from './suggest-protein-upgrades';
 
 const AnalyzeMealPhotoAndSuggestProteinInputSchema = z.object({
   photoDataUri: z
@@ -28,21 +29,49 @@ const AnalyzeMealPhotoAndSuggestProteinOutputSchema = z.object({
     fat: z.number().describe('Fat content in grams.'),
     calories: z.number().describe('Total calories.'),
   }),
-  proteinUpgradeSuggestions: z.array(z.string()).describe('Suggestions for protein upgrades with local Indian ingredients.'),
+  proteinUpgradeSuggestions: z.array(z.object({
+    suggestion: z.string(),
+    proteinGrams: z.number(),
+    carbGrams: z.number(),
+    fatGrams: z.number(),
+  })).describe('Suggestions for protein upgrades with local Indian ingredients.'),
 });
-export type AnalyzeMealPhotoAndSuggestProteinOutput = z.infer<typeof AnalyzeMealPhotoAndSuggestProteinOutputSchema>;
+export type AnalyzeMealPhotoAndSuggestProteinOutput = {
+    mealName: string;
+    macros: {
+        protein: number;
+        carbs: number;
+        fat: number;
+        calories: number;
+    };
+    proteinUpgradeSuggestions: Suggestion[];
+};
 
 export async function analyzeMealPhotoAndSuggestProtein(
   input: AnalyzeMealPhotoAndSuggestProteinInput
 ): Promise<AnalyzeMealPhotoAndSuggestProteinOutput> {
-  return analyzeMealPhotoAndSuggestProteinFlow(input);
+  // This function is a bit of a misnomer now. It only does the photo analysis part.
+  // The suggestions are handled in the action.
+  const result = await analyzeMealPhotoAndSuggestProteinFlow(input);
+  return {
+    ...result,
+    proteinUpgradeSuggestions: [], // This will be populated by the action
+  };
 }
 
 const analyzeMealPhotoAndSuggestProteinPrompt = ai.definePrompt({
   name: 'analyzeMealPhotoAndSuggestProteinPrompt',
   input: {schema: AnalyzeMealPhotoAndSuggestProteinInputSchema},
-  output: {schema: AnalyzeMealPhotoAndSuggestProteinOutputSchema},
-  prompt: `You are an expert nutritionist. Analyze the meal in the photo. Identify the meal, provide a nutritional breakdown (protein, carbs, fat, calories), and suggest GENERIC protein upgrades using local Indian ingredients, suitable for any dietary preference (veg, eggetarian, non-veg).
+  output: {schema: z.object({
+    mealName: z.string().describe('The name of the meal identified from the photo.'),
+    macros: z.object({
+      protein: z.number().describe('Protein content in grams.'),
+      carbs: z.number().describe('Carbohydrates content in grams.'),
+      fat: z.number().describe('Fat content in grams.'),
+      calories: z.number().describe('Total calories.'),
+    }),
+  })},
+  prompt: `You are an expert nutritionist. Analyze the meal in the photo. Identify the meal and provide a nutritional breakdown (protein, carbs, fat, calories).
 
 Photo: {{media url=photoDataUri}}
 `, config: {
@@ -71,7 +100,15 @@ const analyzeMealPhotoAndSuggestProteinFlow = ai.defineFlow(
   {
     name: 'analyzeMealPhotoAndSuggestProteinFlow',
     inputSchema: AnalyzeMealPhotoAndSuggestProteinInputSchema,
-    outputSchema: AnalyzeMealPhotoAndSuggestProteinOutputSchema,
+    outputSchema: z.object({
+        mealName: z.string(),
+        macros: z.object({
+            protein: z.number(),
+            carbs: z.number(),
+            fat: z.number(),
+            calories: z.number(),
+        }),
+    }),
   },
   async input => {
     const {output} = await analyzeMealPhotoAndSuggestProteinPrompt(input);

@@ -21,10 +21,20 @@ const SuggestProteinUpgradesInputSchema = z.object({
 });
 export type SuggestProteinUpgradesInput = z.infer<typeof SuggestProteinUpgradesInputSchema>;
 
+export type Suggestion = {
+    suggestion: string;
+    proteinGrams: number;
+    carbGrams: number;
+    fatGrams: number;
+};
+
 const SuggestProteinUpgradesOutputSchema = z.object({
-  suggestions: z
-    .array(z.string())
-    .describe('A list of suggestions for protein upgrades using local Indian ingredients.'),
+  suggestions: z.array(z.object({
+      suggestion: z.string().describe("The suggestion for a protein upgrade."),
+      proteinGrams: z.number().describe("The amount of protein added in grams."),
+      carbGrams: z.number().describe("The amount of carbs added in grams."),
+      fatGrams: z.number().describe("The amount of fat added in grams."),
+  })).describe('A list of suggestions for protein upgrades using local Indian ingredients.'),
 });
 export type SuggestProteinUpgradesOutput = z.infer<typeof SuggestProteinUpgradesOutputSchema>;
 
@@ -38,12 +48,31 @@ const prompt = ai.definePrompt({
   name: 'suggestProteinUpgradesPrompt',
   input: {schema: SuggestProteinUpgradesInputSchema},
   output: {schema: SuggestProteinUpgradesOutputSchema},
-  prompt: `You are a nutritionist specializing in Indian cuisine. A user has described their meal as "{{mealDescription}}" which contains {{currentProteinGrams}} grams of protein. Suggest some simple and actionable ways to increase the protein content of their meal using local Indian ingredients. Only suggest ingredients that can realistically be added to the meal as described. Return suggestions as a numbered list.
+  prompt: `You are a nutritionist specializing in Indian cuisine. A user has described their meal as "{{mealDescription}}" which contains {{currentProteinGrams}} grams of protein. Suggest some simple and actionable ways to increase the protein content of their meal using local Indian ingredients. Only suggest ingredients that can realistically be added to the meal as described. For each suggestion, provide the added protein, carbs, and fat in grams.
 
 Example Output:
-1. Add 100g of paneer to increase protein by 20g.
-2. Sprinkle 2 tablespoons of roasted chana dal to add 7g of protein.
-3. Drink a glass of milk (240ml) to supplement with 8g of protein.
+{
+  "suggestions": [
+    {
+      "suggestion": "Add 100g of paneer",
+      "proteinGrams": 20,
+      "carbGrams": 4,
+      "fatGrams": 22
+    },
+    {
+      "suggestion": "Add 2 boiled eggs",
+      "proteinGrams": 12,
+      "carbGrams": 1,
+      "fatGrams": 10
+    },
+    {
+      "suggestion": "Drink a glass of milk (240ml)",
+      "proteinGrams": 8,
+      "carbGrams": 12,
+      "fatGrams": 8
+    }
+  ]
+}
 `,
 });
 
