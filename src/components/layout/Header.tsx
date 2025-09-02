@@ -32,6 +32,12 @@ export function Header() {
             >
               History
             </Link>
+            <Link
+              href="/translate"
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Translate
+            </Link>
           </nav>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">

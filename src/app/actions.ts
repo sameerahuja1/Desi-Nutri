@@ -5,6 +5,8 @@ import { textToSpeech } from '@/ai/flows/text-to-speech';
 import type { AnalyzeMealPhotoAndSuggestProteinOutput } from '@/ai/flows/analyze-meal-photo-and-suggest-protein';
 import type { TextToSpeechOutput } from '@/ai/flows/text-to-speech';
 import { suggestProteinUpgrades } from '@/ai/flows/suggest-protein-upgrades';
+import { translateText } from '@/ai/flows/translate-text';
+import type { TranslateTextOutput } from '@/ai/flows/translate-text';
 
 type DietaryPreference = "veg" | "eggetarian" | "non-veg";
 
@@ -55,4 +57,21 @@ export async function handleTextToSpeech(text: string): Promise<TextToSpeechOutp
     console.error('Error generating speech:', error);
     throw new Error('Failed to generate audio. The AI model might be busy. Please try again later.');
   }
+}
+
+export async function handleTranslateText(text: string, targetLanguage: string): Promise<TranslateTextOutput> {
+    if (!text) {
+        throw new Error('Text is missing.');
+    }
+    if (!targetLanguage) {
+        throw new Error('Target language is missing.');
+    }
+
+    try {
+        const result = await translateText({ text, targetLanguage });
+        return result;
+    } catch (error) {
+        console.error('Error translating text:', error);
+        throw new Error('Failed to translate text. The AI model might be busy. Please try again later.');
+    }
 }
