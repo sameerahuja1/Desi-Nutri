@@ -21,7 +21,13 @@ const AnalyzeMealPhotoAndSuggestProteinInputSchema = z.object({
 export type AnalyzeMealPhotoAndSuggestProteinInput = z.infer<typeof AnalyzeMealPhotoAndSuggestProteinInputSchema>;
 
 const AnalyzeMealPhotoAndSuggestProteinOutputSchema = z.object({
-  nutritionAnalysis: z.string().describe('Detailed nutritional analysis of the meal.'),
+  mealName: z.string().describe('The name of the meal identified from the photo.'),
+  macros: z.object({
+    protein: z.number().describe('Protein content in grams.'),
+    carbs: z.number().describe('Carbohydrates content in grams.'),
+    fat: z.number().describe('Fat content in grams.'),
+    calories: z.number().describe('Total calories.'),
+  }),
   proteinUpgradeSuggestions: z.array(z.string()).describe('Suggestions for protein upgrades with local Indian ingredients.'),
 });
 export type AnalyzeMealPhotoAndSuggestProteinOutput = z.infer<typeof AnalyzeMealPhotoAndSuggestProteinOutputSchema>;
@@ -36,15 +42,9 @@ const analyzeMealPhotoAndSuggestProteinPrompt = ai.definePrompt({
   name: 'analyzeMealPhotoAndSuggestProteinPrompt',
   input: {schema: AnalyzeMealPhotoAndSuggestProteinInputSchema},
   output: {schema: AnalyzeMealPhotoAndSuggestProteinOutputSchema},
-  prompt: `Analyze the nutritional content of the meal in the photo and suggest protein upgrades using local Indian ingredients.
+  prompt: `You are an expert nutritionist. Analyze the meal in the photo. Identify the meal, provide a nutritional breakdown (protein, carbs, fat, calories), and suggest protein upgrades using local Indian ingredients.
 
 Photo: {{media url=photoDataUri}}
-
-Respond in markdown format.
-
-Nutritional Analysis:
-
-Protein Upgrade Suggestions:
 `, config: {
     safetySettings: [
       {

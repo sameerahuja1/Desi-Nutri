@@ -1,10 +1,2 @@
-import type { AnalyzeMealPhotoAndSuggestProteinOutput } from "@/ai/flows/analyze-meal-photo-and-suggest-protein";
-
-export type AnalysisResult = AnalyzeMealPhotoAndSuggestProteinOutput;
-
-export type ParsedMacros = {
-  protein: number;
-  carbs: number;
-  fat: number;
-  calories: number;
-};
+// This file is no longer needed with the new structured data from the AI.
+// It is being removed to keep the codebase clean.

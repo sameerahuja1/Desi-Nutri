@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { Camera, Upload, Loader2, Share2, ClipboardList, Lightbulb, RefreshCw, XCircle } from 'lucide-react';
 
@@ -9,13 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { handleAnalyzeMeal } from '../actions';
-import type { AnalysisResult, ParsedMacros } from '@/lib/types';
+import type { AnalyzeMealPhotoAndSuggestProteinOutput } from '@/ai/flows/analyze-meal-photo-and-suggest-protein';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function AnalyzePage() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [analysis, setAnalysis] = useState<AnalyzeMealPhotoAndSuggestProteinOutput | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -97,32 +97,13 @@ export default function AnalyzePage() {
     };
   };
   
-  const parsedMacros = useMemo((): ParsedMacros | null => {
-    if (!analysis?.nutritionAnalysis) return null;
-    
-    const text = analysis.nutritionAnalysis;
-    const macros: ParsedMacros = { protein: 0, carbs: 0, fat: 0, calories: 0 };
-    
-    const proteinMatch = text.match(/protein:\s*(\d+(\.\d+)?)\s*g/i);
-    if (proteinMatch) macros.protein = parseFloat(proteinMatch[1]);
-    
-    const carbsMatch = text.match(/(carbohydrates|carbs):\s*(\d+(\.\d+)?)\s*g/i);
-    if (carbsMatch) macros.carbs = parseFloat(carbsMatch[2]);
-    
-    const fatMatch = text.match(/fat:\s*(\d+(\.\d+)?)\s*g/i);
-    if (fatMatch) macros.fat = parseFloat(fatMatch[1]);
-    
-    const caloriesMatch = text.match(/calories:\s*~?(\d+)/i);
-    if (caloriesMatch) macros.calories = parseInt(caloriesMatch[1], 10);
-    
-    return macros;
-  }, [analysis]);
+  const parsedMacros = useMemo(() => analysis?.macros, [analysis]);
   
   const totalMacros = (parsedMacros?.protein ?? 0) + (parsedMacros?.carbs ?? 0) + (parsedMacros?.fat ?? 0);
 
   const shareOnWhatsApp = () => {
     if (!analysis || !parsedMacros) return;
-    const summary = `My meal has approx. ${parsedMacros.calories} calories!\n- Protein: ${parsedMacros.protein}g\n- Carbs: ${parsedMacros.carbs}g\n- Fat: ${parsedMacros.fat}g\n\nUpgrade Suggestions:\n${analysis.proteinUpgradeSuggestions.join('\n')}\n\nAnalyzed with DesiNutri!`;
+    const summary = `My ${analysis.mealName} has approx. ${parsedMacros.calories} calories!\n- Protein: ${parsedMacros.protein}g\n- Carbs: ${parsedMacros.carbs}g\n- Fat: ${parsedMacros.fat}g\n\nUpgrade Suggestions:\n${analysis.proteinUpgradeSuggestions.join('\n')}\n\nAnalyzed with DesiNutri!`;
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(summary)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -228,7 +209,7 @@ export default function AnalyzePage() {
           <div className="grid md:grid-cols-2 gap-8">
             <Card className="shadow-lg">
                 <CardHeader>
-                    <CardTitle>Your Meal</CardTitle>
+                    <CardTitle>{analysis.mealName}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {previewUrl && <Image src={previewUrl} alt="Analyzed meal" width={600} height={400} className="rounded-lg w-full object-cover aspect-video" />}
