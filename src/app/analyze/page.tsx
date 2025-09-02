@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import Image from 'next/image';
-import { Camera, Upload, Loader2, Share2, ClipboardList, Lightbulb, RefreshCw, XCircle } from 'lucide-react';
+import { Camera, Upload, Loader2, Share2, ClipboardList, Lightbulb, RefreshCw, XCircle, Volume2, PlayCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { handleAnalyzeMeal } from '../actions';
+import { handleAnalyzeMeal, handleTextToSpeech } from '../actions';
 import type { AnalyzeMealPhotoAndSuggestProteinOutput } from '@/ai/flows/analyze-meal-photo-and-suggest-protein';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -20,6 +20,9 @@ export default function AnalyzePage() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -28,6 +31,7 @@ export default function AnalyzePage() {
       setPreviewUrl(URL.createObjectURL(selectedFile));
       setAnalysis(null);
       setError(null);
+      setAudioUrl(null);
     }
   };
 
@@ -43,6 +47,7 @@ export default function AnalyzePage() {
       setPreviewUrl(URL.createObjectURL(droppedFile));
       setAnalysis(null);
       setError(null);
+      setAudioUrl(null);
     }
   };
   
@@ -54,6 +59,7 @@ export default function AnalyzePage() {
     setAnalysis(null);
     setIsLoading(false);
     setError(null);
+    setAudioUrl(null);
     if(fileInputRef.current) {
         fileInputRef.current.value = "";
     }
@@ -72,6 +78,7 @@ export default function AnalyzePage() {
     setIsLoading(true);
     setError(null);
     setAnalysis(null);
+    setAudioUrl(null);
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -118,6 +125,33 @@ export default function AnalyzePage() {
       });
     });
   };
+
+  const playNutritionReport = async () => {
+    if (audioUrl && audioRef.current) {
+      audioRef.current.play();
+      return;
+    }
+    if (!analysis || !parsedMacros || isGeneratingAudio) return;
+
+    setIsGeneratingAudio(true);
+    try {
+      const reportText = `Your meal is ${analysis.mealName}. It has approximately ${parsedMacros.calories} calories. Macros are: ${parsedMacros.protein} grams of protein, ${parsedMacros.carbs} grams of carbohydrates, and ${parsedMacros.fat} grams of fat. Here are some protein upgrade suggestions: ${analysis.proteinUpgradeSuggestions.join(', ')}.`;
+      const result = await handleTextToSpeech(reportText);
+      setAudioUrl(result.media);
+      toast({
+          title: "Audio ready!",
+          description: "Click the play button again to listen.",
+        });
+    } catch (e: any) {
+       toast({
+          title: "Audio Generation Failed",
+          description: e.message || "Please try again later.",
+          variant: "destructive",
+        });
+    } finally {
+        setIsGeneratingAudio(false);
+    }
+  }
 
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
@@ -274,7 +308,7 @@ export default function AnalyzePage() {
           <Card className="shadow-lg">
             <CardHeader>
                 <CardTitle>Next Steps</CardTitle>
-                <CardDescription>Share your results or create a shopping list.</CardDescription>
+                <CardDescription>Share your results, create a shopping list, or listen to the report.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-4">
               <Button onClick={shareOnWhatsApp}>
@@ -283,6 +317,15 @@ export default function AnalyzePage() {
               <Button variant="secondary" onClick={generateShoppingList}>
                 <ClipboardList className="mr-2 h-4 w-4" /> Generate Shopping List
               </Button>
+              <Button variant="secondary" onClick={playNutritionReport} disabled={isGeneratingAudio}>
+                {isGeneratingAudio ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    audioUrl ? <PlayCircle className="mr-2 h-4 w-4" /> : <Volume2 className="mr-2 h-4 w-4" />
+                )}
+                {isGeneratingAudio ? 'Generating...' : (audioUrl ? 'Play Report' : 'Read Report Aloud')}
+              </Button>
+              {audioUrl && <audio ref={audioRef} src={audioUrl} className="hidden" onEnded={() => setAudioUrl(null)} />}
             </CardContent>
           </Card>
         </div>
@@ -290,3 +333,5 @@ export default function AnalyzePage() {
     </div>
   );
 }
+
+    
