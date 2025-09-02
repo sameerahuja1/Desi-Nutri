@@ -1,74 +1,21 @@
+
+'use client';
 import Link from "next/link";
 import { UtensilsCrossed } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center">
-        <div className="mr-4 flex items-center">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
-            <UtensilsCrossed className="h-6 w-6 text-primary" />
-            <span className="font-bold">DesiNutri</span>
-          </Link>
-          <nav className="flex items-center gap-6 text-sm">
-            <Link
-              href="/"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Home
+        <div className="flex items-center">
+            <SidebarTrigger className="md:hidden"/>
+            <Link href="/" className="mr-6 flex items-center space-x-2">
+                <UtensilsCrossed className="h-6 w-6 text-primary hidden md:flex" />
+                <span className="font-bold hidden md:inline-block">DesiNutri</span>
             </Link>
-            <Link
-              href="/analyze"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Analyze Meal
-            </Link>
-            <Link
-              href="/family-meal"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Family Meal
-            </Link>
-            <Link
-              href="/cooking-coach"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Cooking Coach
-            </Link>
-             <Link
-              href="/lookup"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Ingredient Lookup
-            </Link>
-            <Link
-              href="/achievements"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Achievements
-            </Link>
-             <Link
-              href="/reminders"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Reminders
-            </Link>
-            <Link
-              href="/challenges"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Challenges
-            </Link>
-            <Link
-              href="/translate"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Translate
-            </Link>
-          </nav>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
           <Button asChild>
