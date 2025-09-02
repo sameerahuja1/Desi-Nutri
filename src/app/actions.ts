@@ -28,6 +28,7 @@ export async function handleAnalyzeMeal(photoDataUri: string, dietaryPreference:
         suggestionsResult = await suggestProteinUpgrades({
             mealDescription: analysisResult.mealName,
             currentProteinGrams: analysisResult.macros.protein,
+            dietaryPreference: dietaryPreference,
         });
     }
     
