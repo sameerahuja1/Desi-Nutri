@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useRef } from 'react';
 import Image from 'next/image';
-import { Camera, Upload, Loader2, Share2, ClipboardList, Lightbulb, RefreshCw, XCircle, Volume2, PlayCircle } from 'lucide-react';
+import { Camera, Upload, Loader2, Share2, ClipboardList, Lightbulb, RefreshCw, XCircle, Volume2, PlayCircle, Leaf, Egg, Beef } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -11,6 +11,9 @@ import { useToast } from '@/hooks/use-toast';
 import { handleAnalyzeMeal, handleTextToSpeech } from '../actions';
 import type { AnalyzeMealPhotoAndSuggestProteinOutput } from '@/ai/flows/analyze-meal-photo-and-suggest-protein';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+type DietaryPreference = "veg" | "eggetarian" | "non-veg";
 
 export default function AnalyzePage() {
   const [file, setFile] = useState<File | null>(null);
@@ -18,6 +21,7 @@ export default function AnalyzePage() {
   const [analysis, setAnalysis] = useState<AnalyzeMealPhotoAndSuggestProteinOutput | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [dietaryPreference, setDietaryPreference] = useState<DietaryPreference>("veg");
   const { toast } = useToast();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -85,7 +89,7 @@ export default function AnalyzePage() {
     reader.onload = async () => {
       try {
         const base64Image = reader.result as string;
-        const result = await handleAnalyzeMeal(base64Image);
+        const result = await handleAnalyzeMeal(base64Image, dietaryPreference);
         setAnalysis(result);
       } catch (e: any) {
         setError(e.message || "An unknown error occurred.");
@@ -159,7 +163,7 @@ export default function AnalyzePage() {
          <Card className="shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="text-3xl font-headline">Analyze Your Meal</CardTitle>
-            <CardDescription>Upload a photo to get an instant nutritional breakdown.</CardDescription>
+            <CardDescription>Upload a photo and select your dietary style for personalized suggestions.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-6">
             <div
@@ -181,6 +185,27 @@ export default function AnalyzePage() {
                 </div>
               )}
             </div>
+            
+            <div className="w-full max-w-lg space-y-4">
+                <CardTitle className="text-xl text-center">Dietary Style</CardTitle>
+                <Select onValueChange={(value: DietaryPreference) => setDietaryPreference(value)} defaultValue={dietaryPreference}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select your dietary style" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="veg">
+                      <div className="flex items-center gap-2"><Leaf className="h-4 w-4 text-green-600"/> Vegetarian</div>
+                    </SelectItem>
+                    <SelectItem value="eggetarian">
+                      <div className="flex items-center gap-2"><Egg className="h-4 w-4 text-yellow-600"/> Eggetarian</div>
+                    </SelectItem>
+                    <SelectItem value="non-veg">
+                      <div className="flex items-center gap-2"><Beef className="h-4 w-4 text-red-600"/> Non-Vegetarian</div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+            </div>
+
             {previewUrl && (
               <div className="flex gap-4">
                 <Button size="lg" onClick={handleSubmit}>
@@ -333,5 +358,3 @@ export default function AnalyzePage() {
     </div>
   );
 }
-
-    

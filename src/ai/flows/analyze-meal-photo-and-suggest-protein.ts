@@ -42,7 +42,7 @@ const analyzeMealPhotoAndSuggestProteinPrompt = ai.definePrompt({
   name: 'analyzeMealPhotoAndSuggestProteinPrompt',
   input: {schema: AnalyzeMealPhotoAndSuggestProteinInputSchema},
   output: {schema: AnalyzeMealPhotoAndSuggestProteinOutputSchema},
-  prompt: `You are an expert nutritionist. Analyze the meal in the photo. Identify the meal, provide a nutritional breakdown (protein, carbs, fat, calories), and suggest protein upgrades using local Indian ingredients.
+  prompt: `You are an expert nutritionist. Analyze the meal in the photo. Identify the meal, provide a nutritional breakdown (protein, carbs, fat, calories), and suggest GENERIC protein upgrades using local Indian ingredients, suitable for any dietary preference (veg, eggetarian, non-veg).
 
 Photo: {{media url=photoDataUri}}
 `, config: {

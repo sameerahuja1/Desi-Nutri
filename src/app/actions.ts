@@ -1,17 +1,39 @@
 "use server";
 import { analyzeMealPhotoAndSuggestProtein } from '@/ai/flows/analyze-meal-photo-and-suggest-protein';
+import { suggestProteinUpgradesForVeg } from '@/ai/flows/suggest-protein-upgrades-for-veg-flow';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import type { AnalyzeMealPhotoAndSuggestProteinOutput } from '@/ai/flows/analyze-meal-photo-and-suggest-protein';
 import type { TextToSpeechOutput } from '@/ai/flows/text-to-speech';
 
-export async function handleAnalyzeMeal(photoDataUri: string): Promise<AnalyzeMealPhotoAndSuggestProteinOutput> {
+type DietaryPreference = "veg" | "eggetarian" | "non-veg";
+
+export async function handleAnalyzeMeal(photoDataUri: string, dietaryPreference: DietaryPreference): Promise<AnalyzeMealPhotoAndSuggestProteinOutput> {
   if (!photoDataUri) {
     throw new Error('Image data is missing.');
   }
 
   try {
-    const result = await analyzeMealPhotoAndSuggestProtein({ photoDataUri });
-    return result;
+    // First, analyze the photo to get the meal name and macros
+    const analysisResult = await analyzeMealPhotoAndSuggestProtein({ photoDataUri });
+
+    // Then, get personalized suggestions based on diet
+    let suggestionsResult;
+    if (dietaryPreference === 'veg') {
+      suggestionsResult = await suggestProteinUpgradesForVeg({
+        mealDescription: analysisResult.mealName,
+        currentProteinGrams: analysisResult.macros.protein,
+      });
+    } else {
+        // TODO: Implement eggetarian and non-veg flows. For now, use the general one.
+         const generalSuggestions = await analyzeMealPhotoAndSuggestProtein({ photoDataUri });
+         suggestionsResult = { suggestions: generalSuggestions.proteinUpgradeSuggestions };
+    }
+    
+    return {
+      ...analysisResult,
+      proteinUpgradeSuggestions: suggestionsResult.suggestions,
+    };
+
   } catch (error) {
     console.error('Error analyzing meal:', error);
     throw new Error('Failed to analyze meal. The AI model might be busy. Please try again later.');
@@ -31,5 +53,3 @@ export async function handleTextToSpeech(text: string): Promise<TextToSpeechOutp
     throw new Error('Failed to generate audio. The AI model might be busy. Please try again later.');
   }
 }
-
-    
