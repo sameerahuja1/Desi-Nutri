@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useRef } from 'react';
@@ -362,78 +363,64 @@ export default function AnalyzePage() {
                   </Alert>}
                 </CardContent>
               </Card>
-              {analysis.riskAnalysis && <RiskCard analysis={analysis.riskAnalysis} />}
+
+              {analysis.riskAnalysis && (
+                  <RiskCard analysis={analysis.riskAnalysis} />
+              )}
             </div>
           </div>
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle>Quick Protein Upgrades</CardTitle>
-              <CardDescription>See how easy it is to boost your meal's protein with these suggestions.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {analysis.proteinUpgradeSuggestions.map((suggestion, index) => {
-                const newMacros = {
-                    protein: (parsedMacros.protein || 0) + suggestion.proteinGrams,
-                    carbs: (parsedMacros.carbs || 0) + suggestion.carbGrams,
-                    fat: (parsedMacros.fat || 0) + suggestion.fatGrams,
-                };
-                const newTotalMacros = newMacros.protein + newMacros.carbs + newMacros.fat;
-
-                return (
-                    <Card key={index} className="bg-green-50/50 border-green-200">
-                        <CardHeader>
-                            <CardTitle className="flex items-start gap-3">
-                               <Lightbulb className="h-8 w-8 text-green-600 flex-shrink-0 mt-1" />
-                               <span className="text-lg font-semibold">{suggestion.suggestion}</span>
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid md:grid-cols-2 gap-6 items-center">
-                            <div className="space-y-3">
-                                <p className="font-semibold text-center text-muted-foreground">Before</p>
-                                <MacroBar label="Protein" value={parsedMacros.protein} total={totalMacros} colorClass="bg-primary" />
-                                <MacroBar label="Carbs" value={parsedMacros.carbs} total={totalMacros} colorClass="bg-yellow-500" />
-                                <MacroBar label="Fat" value={parsedMacros.fat} total={totalMacros} colorClass="bg-red-500" />
-                            </div>
-                             <div className="space-y-3">
-                                <p className="font-semibold text-center text-muted-foreground">After</p>
-                                <MacroBar label="Protein" value={newMacros.protein} total={newTotalMacros} colorClass="bg-primary" />
-                                <MacroBar label="Carbs" value={newMacros.carbs} total={newTotalMacros} colorClass="bg-yellow-500" />
-                                <MacroBar label="Fat" value={newMacros.fat} total={newTotalMacros} colorClass="bg-red-500" />
-                            </div>
-                        </CardContent>
+          <Separator />
+           <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lightbulb className="text-primary"/> Quick Protein Upgrades
+                  </CardTitle>
+                  <CardDescription>Simple, local ingredients to enhance your meal.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {analysis.proteinUpgradeSuggestions.map((suggestion, index) => (
+                    <Card key={index} className="bg-green-50/30 border-green-200 hover:shadow-md transition-shadow">
+                      <CardHeader>
+                        <CardTitle className="text-lg flex items-start gap-3">
+                           <Lightbulb className="h-6 w-5 text-green-600 flex-shrink-0 mt-1" />
+                           <span>{suggestion.suggestion}</span>
+                        </CardTitle>
+                         <CardDescription className="font-bold text-green-700">
+                            +{suggestion.proteinGrams}g Protein
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                          <p className="text-sm text-muted-foreground">
+                            Adds ~{suggestion.carbGrams}g Carbs, ~{suggestion.fatGrams}g Fat
+                          </p>
+                      </CardContent>
                     </Card>
-                )
-              })}
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-lg">
-            <CardHeader>
-                <CardTitle>Next Steps</CardTitle>
-                <CardDescription>Share your results, create a shopping list, or listen to the report.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-4">
-              <Button onClick={shareOnWhatsApp}>
-                <Share2 className="mr-2 h-4 w-4" /> Share on WhatsApp
-              </Button>
-              <Button variant="secondary" onClick={generateShoppingList}>
-                <ClipboardList className="mr-2 h-4 w-4" /> Copy Shopping List
-              </Button>
-              <Button variant="secondary" onClick={playNutritionReport} disabled={isGeneratingAudio}>
-                {isGeneratingAudio ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                    audioUrl && audioRef.current && !audioRef.current.paused ? <Volume2 className="mr-2 h-4 w-4" /> : <PlayCircle className="mr-2 h-4 w-4" />
-                )}
-                {isGeneratingAudio ? 'Generating...' : (audioUrl ? 'Play/Pause Report' : 'Read Report Aloud')}
-              </Button>
-              {audioUrl && <audio ref={audioRef} src={audioUrl} onEnded={() => {
-                if(audioRef.current) audioRef.current.currentTime = 0;
-              }} />}
-            </CardContent>
-          </Card>
+                  ))}
+                </CardContent>
+                <CardFooter className="gap-4">
+                    <Button onClick={playNutritionReport} disabled={isGeneratingAudio}>
+                         {isGeneratingAudio ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            audioUrl && audioRef.current && !audioRef.current.paused ? <Volume2 className="mr-2 h-4 w-4" /> : <PlayCircle className="mr-2 h-4 w-4" />
+                        )}
+                        {isGeneratingAudio ? 'Generating...' : (audioUrl ? 'Play/Pause Report' : 'Read Report Aloud')}
+                    </Button>
+                    <Button variant="secondary" onClick={generateShoppingList}>
+                        <ClipboardList className="mr-2 h-4 w-4"/> Copy Shopping List
+                    </Button>
+                    <Button variant="secondary" onClick={shareOnWhatsApp}>
+                        <Share2 className="mr-2 h-4 w-4"/> Share
+                    </Button>
+                     {audioUrl && <audio ref={audioRef} src={audioUrl} onEnded={() => {
+                        if(audioRef.current) audioRef.current.currentTime = 0;
+                    }} className="hidden" />}
+                </CardFooter>
+            </Card>
         </div>
       )}
     </div>
   );
 }
+
+    
