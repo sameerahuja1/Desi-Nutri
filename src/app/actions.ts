@@ -7,6 +7,8 @@ import type { TextToSpeechOutput } from '@/ai/flows/text-to-speech';
 import { suggestProteinUpgrades } from '@/ai/flows/suggest-protein-upgrades';
 import { translateText } from '@/ai/flows/translate-text';
 import type { TranslateTextOutput } from '@/ai/flows/translate-text';
+import { cookingCoach } from '@/ai/flows/cooking-coach';
+import type { CookingCoachOutput } from '@/ai/flows/cooking-coach';
 
 type DietaryPreference = "veg" | "eggetarian" | "non-veg";
 
@@ -73,5 +75,19 @@ export async function handleTranslateText(text: string, targetLanguage: string):
     } catch (error) {
         console.error('Error translating text:', error);
         throw new Error('Failed to translate text. The AI model might be busy. Please try again later.');
+    }
+}
+
+export async function handleCookingCoach(mealDescription: string, dietaryPreference: DietaryPreference): Promise<CookingCoachOutput> {
+    if (!mealDescription) {
+        throw new Error('Meal description is missing.');
+    }
+
+    try {
+        const result = await cookingCoach({ mealDescription, dietaryPreference });
+        return result;
+    } catch (error) {
+        console.error('Error getting cooking tips:', error);
+        throw new Error('Failed to get cooking tips. The AI model might be busy. Please try again later.');
     }
 }

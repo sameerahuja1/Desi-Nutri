@@ -27,6 +27,12 @@ export function Header() {
               Analyze Meal
             </Link>
             <Link
+              href="/cooking-coach"
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Cooking Coach
+            </Link>
+            <Link
               href="/history"
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
