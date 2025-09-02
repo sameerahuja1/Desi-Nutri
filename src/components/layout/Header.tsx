@@ -39,10 +39,10 @@ export function Header() {
               Cooking Coach
             </Link>
             <Link
-              href="/history"
+              href="/achievements"
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
-              History
+              Achievements
             </Link>
             <Link
               href="/translate"
