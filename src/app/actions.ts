@@ -11,6 +11,8 @@ import { cookingCoach } from '@/ai/flows/cooking-coach';
 import type { CookingCoachOutput } from '@/ai/flows/cooking-coach';
 import { familyMealAnalysis } from '@/ai/flows/family-meal-analysis';
 import type { FamilyMealAnalysisInput, FamilyMealAnalysisOutput } from '@/ai/flows/family-meal-analysis';
+import { ingredientLookup } from '@/ai/flows/ingredient-lookup';
+import type { IngredientLookupOutput } from '@/ai/flows/ingredient-lookup';
 
 
 type DietaryPreference = "veg" | "eggetarian" | "non-veg";
@@ -109,5 +111,19 @@ export async function handleFamilyMealAnalysis(input: FamilyMealAnalysisInput): 
     } catch (error) {
         console.error('Error analyzing family meal:', error);
         throw new Error('Failed to analyze family meal. The AI model might be busy. Please try again later.');
+    }
+}
+
+export async function handleIngredientLookup(ingredientName: string): Promise<IngredientLookupOutput> {
+    if (!ingredientName) {
+        throw new Error('Ingredient name is missing.');
+    }
+
+    try {
+        const result = await ingredientLookup({ ingredientName });
+        return result;
+    } catch (error) {
+        console.error('Error looking up ingredient:', error);
+        throw new Error('Failed to look up ingredient. The AI model might be busy. Please try again later.');
     }
 }

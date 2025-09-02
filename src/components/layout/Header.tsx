@@ -38,6 +38,12 @@ export function Header() {
             >
               Cooking Coach
             </Link>
+             <Link
+              href="/lookup"
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Ingredient Lookup
+            </Link>
             <Link
               href="/achievements"
               className="transition-colors hover:text-foreground/80 text-foreground/60"
