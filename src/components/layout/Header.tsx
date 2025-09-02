@@ -57,6 +57,12 @@ export function Header() {
               Reminders
             </Link>
             <Link
+              href="/challenges"
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Challenges
+            </Link>
+            <Link
               href="/translate"
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
