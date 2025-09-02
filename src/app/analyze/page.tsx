@@ -110,7 +110,10 @@ export default function AnalyzePage() {
   
   const parsedMacros = useMemo(() => analysis?.macros, [analysis]);
   
-  const totalMacros = (parsedMacros?.protein ?? 0) + (parsedMacros?.carbs ?? 0) + (parsedMacros?.fat ?? 0);
+  const totalMacros = useMemo(() => {
+    if (!parsedMacros) return 0;
+    return (parsedMacros.protein || 0) + (parsedMacros.carbs || 0) + (parsedMacros.fat || 0);
+  }, [parsedMacros]);
 
   const shareOnWhatsApp = () => {
     if (!analysis || !parsedMacros) return;
@@ -132,12 +135,17 @@ export default function AnalyzePage() {
 
   const playNutritionReport = async () => {
     if (audioUrl && audioRef.current) {
-      audioRef.current.play();
+      if (audioRef.current.paused) {
+        audioRef.current.play();
+      } else {
+        audioRef.current.pause();
+      }
       return;
     }
     if (!analysis || !parsedMacros || isGeneratingAudio) return;
 
     setIsGeneratingAudio(true);
+    setAudioUrl(null); // Reset previous audio
     try {
       const reportText = `Your meal is ${analysis.mealName}. It has approximately ${parsedMacros.calories} calories. Macros are: ${parsedMacros.protein} grams of protein, ${parsedMacros.carbs} grams of carbohydrates, and ${parsedMacros.fat} grams of fat. Here are some protein upgrade suggestions: ${analysis.proteinUpgradeSuggestions.join(', ')}.`;
       const result = await handleTextToSpeech(reportText);
@@ -223,7 +231,9 @@ export default function AnalyzePage() {
                     <Button onClick={triggerFileSelect}>
                         <Upload className="mr-2 h-4 w-4" /> Upload Photo
                     </Button>
-                    <Button variant="secondary" onClick={triggerFileSelect}>
+                    <Button variant="secondary" onClick={() => {
+                      toast({ title: 'Camera access coming soon!', description: 'This feature is currently under development.'})
+                    }}>
                         <Camera className="mr-2 h-4 w-4" /> Use Camera
                     </Button>
                 </div>
@@ -271,7 +281,7 @@ export default function AnalyzePage() {
                     <CardTitle>{analysis.mealName}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {previewUrl && <Image src={previewUrl} alt="Analyzed meal" width={600} height={400} className="rounded-lg w-full object-cover aspect-video" />}
+                    {previewUrl && <Image src={previewUrl} alt={analysis.mealName} width={600} height={400} className="rounded-lg w-full object-cover aspect-video" />}
                 </CardContent>
             </Card>
             <Card className="shadow-lg">
@@ -283,29 +293,36 @@ export default function AnalyzePage() {
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="font-medium">Protein</span>
-                    <span className="font-bold text-primary">{parsedMacros.protein}g</span>
+                    <span className="font-bold text-primary">{parsedMacros.protein || 0}g</span>
                   </div>
-                  <Progress value={(parsedMacros.protein / totalMacros) * 100} className="h-3 [&>div]:bg-primary" />
+                  <Progress value={totalMacros > 0 ? ((parsedMacros.protein || 0) / totalMacros) * 100 : 0} className="h-3 [&>div]:bg-primary" />
                 </div>
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="font-medium">Carbohydrates</span>
-                    <span className="font-bold text-yellow-500">{parsedMacros.carbs}g</span>
+                    <span className="font-bold text-yellow-500">{parsedMacros.carbs || 0}g</span>
                   </div>
-                  <Progress value={(parsedMacros.carbs / totalMacros) * 100} className="h-3 [&>div]:bg-yellow-500" />
+                  <Progress value={totalMacros > 0 ? ((parsedMacros.carbs || 0) / totalMacros) * 100 : 0} className="h-3 [&>div]:bg-yellow-500" />
                 </div>
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="font-medium">Fat</span>
-                    <span className="font-bold text-red-500">{parsedMacros.fat}g</span>
+                    <span className="font-bold text-red-500">{parsedMacros.fat || 0}g</span>
                   </div>
-                  <Progress value={(parsedMacros.fat / totalMacros) * 100} className="h-3 [&>div]:bg-red-500" />
+                  <Progress value={totalMacros > 0 ? ((parsedMacros.fat || 0) / totalMacros) * 100 : 0} className="h-3 [&>div]:bg-red-500" />
                 </div>
-                {parsedMacros.protein < 15 && <Alert className="mt-4 border-primary/50 text-primary">
+                {(parsedMacros.protein || 0) < 15 && <Alert className="mt-4 border-primary/50 text-primary">
                   <Lightbulb className="h-4 w-4" />
-                  <AlertTitle>Protein Boost Needed!</AlertTitle>
+                  <AlertTitle>Needs Attention: Protein Boost Needed!</AlertTitle>
                   <AlertDescription>
-                    This meal is a bit low on protein. Check out the upgrade suggestions!
+                    This meal is a bit low on protein. Check out the upgrade suggestions below to hit your goals!
+                  </AlertDescription>
+                </Alert>}
+                 {(parsedMacros.protein || 0) >= 15 && <Alert className="mt-4 border-green-500/50 text-green-700">
+                  <Lightbulb className="h-4 w-4" />
+                  <AlertTitle>Well Done: Good Protein Content!</AlertTitle>
+                  <AlertDescription>
+                    This meal has a solid amount of protein. Keep up the great work!
                   </AlertDescription>
                 </Alert>}
               </CardContent>
@@ -318,11 +335,11 @@ export default function AnalyzePage() {
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {analysis.proteinUpgradeSuggestions.map((suggestion, index) => (
-                <Card key={index} className="bg-green-50/50 border-green-200">
-                    <CardHeader>
-                        <CardTitle className="flex items-start gap-2">
-                           <Lightbulb className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
-                           <span className="text-base">{suggestion}</span>
+                <Card key={index} className="bg-green-50/50 border-green-200 flex flex-col">
+                    <CardHeader className="flex-grow">
+                        <CardTitle className="flex items-start gap-3">
+                           <Lightbulb className="h-8 w-8 text-green-600 flex-shrink-0 mt-1" />
+                           <span className="text-base font-medium">{suggestion}</span>
                         </CardTitle>
                     </CardHeader>
                 </Card>
@@ -340,17 +357,19 @@ export default function AnalyzePage() {
                 <Share2 className="mr-2 h-4 w-4" /> Share on WhatsApp
               </Button>
               <Button variant="secondary" onClick={generateShoppingList}>
-                <ClipboardList className="mr-2 h-4 w-4" /> Generate Shopping List
+                <ClipboardList className="mr-2 h-4 w-4" /> Copy Shopping List
               </Button>
               <Button variant="secondary" onClick={playNutritionReport} disabled={isGeneratingAudio}>
                 {isGeneratingAudio ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                    audioUrl ? <PlayCircle className="mr-2 h-4 w-4" /> : <Volume2 className="mr-2 h-4 w-4" />
+                    audioUrl && audioRef.current && !audioRef.current.paused ? <Volume2 className="mr-2 h-4 w-4" /> : <PlayCircle className="mr-2 h-4 w-4" />
                 )}
-                {isGeneratingAudio ? 'Generating...' : (audioUrl ? 'Play Report' : 'Read Report Aloud')}
+                {isGeneratingAudio ? 'Generating...' : (audioUrl ? 'Play/Pause Report' : 'Read Report Aloud')}
               </Button>
-              {audioUrl && <audio ref={audioRef} src={audioUrl} className="hidden" onEnded={() => setAudioUrl(null)} />}
+              {audioUrl && <audio ref={audioRef} src={audioUrl} onEnded={() => {
+                if(audioRef.current) audioRef.current.currentTime = 0;
+              }} />}
             </CardContent>
           </Card>
         </div>

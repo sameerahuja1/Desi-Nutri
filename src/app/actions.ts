@@ -4,6 +4,7 @@ import { suggestProteinUpgradesForVeg } from '@/ai/flows/suggest-protein-upgrade
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import type { AnalyzeMealPhotoAndSuggestProteinOutput } from '@/ai/flows/analyze-meal-photo-and-suggest-protein';
 import type { TextToSpeechOutput } from '@/ai/flows/text-to-speech';
+import { suggestProteinUpgrades } from '@/ai/flows/suggest-protein-upgrades';
 
 type DietaryPreference = "veg" | "eggetarian" | "non-veg";
 
@@ -24,9 +25,10 @@ export async function handleAnalyzeMeal(photoDataUri: string, dietaryPreference:
         currentProteinGrams: analysisResult.macros.protein,
       });
     } else {
-        // TODO: Implement eggetarian and non-veg flows. For now, use the general one.
-         const generalSuggestions = await analyzeMealPhotoAndSuggestProtein({ photoDataUri });
-         suggestionsResult = { suggestions: generalSuggestions.proteinUpgradeSuggestions };
+        suggestionsResult = await suggestProteinUpgrades({
+            mealDescription: analysisResult.mealName,
+            currentProteinGrams: analysisResult.macros.protein,
+        });
     }
     
     return {
