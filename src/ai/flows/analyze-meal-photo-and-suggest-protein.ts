@@ -29,6 +29,10 @@ const AnalyzeMealPhotoAndSuggestProteinOutputSchema = z.object({
     fat: z.number().describe('Fat content in grams.'),
     calories: z.number().describe('Total calories.'),
   }),
+  riskAnalysis: z.object({
+      score: z.enum(['low', 'medium', 'high']).describe('A risk score for diabetes and heart health based on the meal.'),
+      reasoning: z.string().describe('A brief explanation for the risk score provided.')
+  }),
   proteinUpgradeSuggestions: z.array(z.object({
     suggestion: z.string(),
     proteinGrams: z.number(),
@@ -43,6 +47,10 @@ export type AnalyzeMealPhotoAndSuggestProteinOutput = {
         carbs: number;
         fat: number;
         calories: number;
+    };
+    riskAnalysis: {
+        score: 'low' | 'medium' | 'high';
+        reasoning: string;
     };
     proteinUpgradeSuggestions: Suggestion[];
 };
@@ -70,8 +78,14 @@ const analyzeMealPhotoAndSuggestProteinPrompt = ai.definePrompt({
       fat: z.number().describe('Fat content in grams.'),
       calories: z.number().describe('Total calories.'),
     }),
+    riskAnalysis: z.object({
+        score: z.enum(['low', 'medium', 'high']).describe('A risk score for diabetes and heart health based on the meal ingredients (e.g., high glycemic index, saturated fats).'),
+        reasoning: z.string().describe('A brief, simple explanation for the risk score provided. Max 1-2 sentences.')
+    }),
   })},
-  prompt: `You are an expert nutritionist. Analyze the meal in the photo. Identify the meal and provide a nutritional breakdown (protein, carbs, fat, calories).
+  prompt: `You are an expert nutritionist. Analyze the meal in the photo. 
+  1. Identify the meal and provide a nutritional breakdown (protein, carbs, fat, calories).
+  2. Provide a "Diabetes/Heart Risk" score (low, medium, or high) based on the meal's likely ingredients. Consider factors like high glycemic index carbohydrates (e.g., white rice, refined flour) and unhealthy fats. Provide a brief reasoning for your score.
 
 Photo: {{media url=photoDataUri}}
 `, config: {
@@ -107,6 +121,10 @@ const analyzeMealPhotoAndSuggestProteinFlow = ai.defineFlow(
             carbs: z.number(),
             fat: z.number(),
             calories: z.number(),
+        }),
+        riskAnalysis: z.object({
+            score: z.enum(['low', 'medium', 'high']),
+            reasoning: z.string(),
         }),
     }),
   },

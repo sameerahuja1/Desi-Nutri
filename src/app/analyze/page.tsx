@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useRef } from 'react';
 import Image from 'next/image';
-import { Camera, Upload, Loader2, Share2, ClipboardList, Lightbulb, RefreshCw, XCircle, Volume2, PlayCircle, Leaf, Egg, Beef, ArrowRight } from 'lucide-react';
+import { Camera, Upload, Loader2, Share2, ClipboardList, Lightbulb, RefreshCw, XCircle, Volume2, PlayCircle, Leaf, Egg, Beef, ArrowRight, ShieldCheck, ShieldAlert, Shield } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import type { AnalyzeMealPhotoAndSuggestProteinOutput } from '@/ai/flows/analyze
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 
 type DietaryPreference = "veg" | "eggetarian" | "non-veg";
 
@@ -26,6 +27,44 @@ const MacroBar = ({ label, value, total, colorClass }: { label: string, value: n
     </div>
 );
 
+const RiskCard = ({ analysis }: { analysis: AnalyzeMealPhotoAndSuggestProteinOutput['riskAnalysis'] }) => {
+    const riskData = {
+        low: {
+            icon: <ShieldCheck className="h-8 w-8 text-green-600" />,
+            title: "Low Risk",
+            badgeClass: "bg-green-100 text-green-800 border-green-300",
+            cardClass: "border-green-200 bg-green-50/50"
+        },
+        medium: {
+            icon: <ShieldAlert className="h-8 w-8 text-yellow-600" />,
+            title: "Medium Risk",
+            badgeClass: "bg-yellow-100 text-yellow-800 border-yellow-300",
+            cardClass: "border-yellow-200 bg-yellow-50/50"
+        },
+        high: {
+            icon: <Shield className="h-8 w-8 text-red-600" />,
+            title: "High Risk",
+            badgeClass: "bg-red-100 text-red-800 border-red-300",
+            cardClass: "border-red-200 bg-red-50/50"
+        },
+    }
+    const currentRisk = riskData[analysis.score];
+
+    return (
+        <Card className={currentRisk.cardClass}>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                    {currentRisk.icon}
+                    <span>Health Risk Analysis</span>
+                </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+                <Badge variant="outline" className={`text-base ${currentRisk.badgeClass}`}>{currentRisk.title}</Badge>
+                <p className="text-muted-foreground">{analysis.reasoning}</p>
+            </CardContent>
+        </Card>
+    )
+}
 
 export default function AnalyzePage() {
   const [file, setFile] = useState<File | null>(null);
@@ -296,32 +335,35 @@ export default function AnalyzePage() {
                     {previewUrl && <Image src={previewUrl} alt={analysis.mealName} width={600} height={400} className="rounded-lg w-full object-cover aspect-video" />}
                 </CardContent>
             </Card>
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle>Macros Breakdown</CardTitle>
-                <CardDescription>Estimated values for your meal. Total: ~{parsedMacros.calories} kcal</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <MacroBar label="Protein" value={parsedMacros.protein} total={totalMacros} colorClass="bg-primary" />
-                <MacroBar label="Carbohydrates" value={parsedMacros.carbs} total={totalMacros} colorClass="bg-yellow-500" />
-                <MacroBar label="Fat" value={parsedMacros.fat} total={totalMacros} colorClass="bg-red-500" />
-                
-                {(parsedMacros.protein || 0) < 15 && <Alert className="mt-4 border-primary/50 text-primary">
-                  <Lightbulb className="h-4 w-4" />
-                  <AlertTitle>Needs Attention: Protein Boost Needed!</AlertTitle>
-                  <AlertDescription>
-                    This meal is a bit low on protein. Check out the upgrade suggestions below to hit your goals!
-                  </AlertDescription>
-                </Alert>}
-                 {(parsedMacros.protein || 0) >= 15 && <Alert className="mt-4 border-green-500/50 text-green-700">
-                  <Lightbulb className="h-4 w-4" />
-                  <AlertTitle>Well Done: Good Protein Content!</AlertTitle>
-                  <AlertDescription>
-                    This meal has a solid amount of protein. Keep up the great work!
-                  </AlertDescription>
-                </Alert>}
-              </CardContent>
-            </Card>
+            <div className="space-y-8">
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle>Macros Breakdown</CardTitle>
+                  <CardDescription>Estimated values for your meal. Total: ~{parsedMacros.calories} kcal</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <MacroBar label="Protein" value={parsedMacros.protein} total={totalMacros} colorClass="bg-primary" />
+                  <MacroBar label="Carbohydrates" value={parsedMacros.carbs} total={totalMacros} colorClass="bg-yellow-500" />
+                  <MacroBar label="Fat" value={parsedMacros.fat} total={totalMacros} colorClass="bg-red-500" />
+                  
+                  {(parsedMacros.protein || 0) < 15 && <Alert className="mt-4 border-primary/50 text-primary">
+                    <Lightbulb className="h-4 w-4" />
+                    <AlertTitle>Needs Attention: Protein Boost Needed!</AlertTitle>
+                    <AlertDescription>
+                      This meal is a bit low on protein. Check out the upgrade suggestions below to hit your goals!
+                    </AlertDescription>
+                  </Alert>}
+                   {(parsedMacros.protein || 0) >= 15 && <Alert className="mt-4 border-green-500/50 text-green-700">
+                    <Lightbulb className="h-4 w-4" />
+                    <AlertTitle>Well Done: Good Protein Content!</AlertTitle>
+                    <AlertDescription>
+                      This meal has a solid amount of protein. Keep up the great work!
+                    </AlertDescription>
+                  </Alert>}
+                </CardContent>
+              </Card>
+              {analysis.riskAnalysis && <RiskCard analysis={analysis.riskAnalysis} />}
+            </div>
           </div>
           <Card className="shadow-lg">
             <CardHeader>
