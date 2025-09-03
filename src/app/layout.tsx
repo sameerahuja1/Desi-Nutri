@@ -10,11 +10,6 @@ import Link from 'next/link';
 import { UtensilsCrossed, Home, Camera, Users, ChefHat, Search, Trophy, Bell, Star } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
-const metadata: Metadata = {
-  title: 'DesiNutri: Upgrade Your Indian Meals',
-  description: 'Instantly analyze your Indian meals, get nutrition facts, and receive smart, local suggestions to boost your protein intake.',
-};
-
 const navItems = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/analyze', label: 'Analyze Meal', icon: Camera },
@@ -52,7 +47,7 @@ export default function RootLayout({
                     <SidebarMenu>
                     {navItems.map((item) => (
                         <SidebarMenuItem key={item.label}>
-                            <Link href={item.href} legacyBehavior passHref>
+                            <Link href={item.href}>
                                 <SidebarMenuButton isActive={pathname === item.href}>
                                     <item.icon className="h-5 w-5" />
                                     <span>{item.label}</span>
