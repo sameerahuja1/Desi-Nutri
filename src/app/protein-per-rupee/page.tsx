@@ -19,7 +19,7 @@ const proteinData = [
   { name: 'Peanuts', protein: 26, price: 15, serving: '100g' },
   { name: 'Moong Dal', protein: 24, price: 18, serving: '100g' },
   { name: 'Chana Dal', protein: 25, price: 20, serving: '100g' },
-  { name: 'Eggs', protein: 13, price: 42, serving: '6 large eggs (~300g)' },
+  { name: 'Eggs', protein: 36, price: 42, serving: '6 large eggs (~300g)' },
   { name: 'Paneer', protein: 20, price: 70, serving: '200g' },
   { name: 'Tofu', protein: 8, price: 45, serving: '200g' },
   { name: 'Chicken Breast', protein: 31, price: 120, serving: '250g' },
