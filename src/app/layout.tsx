@@ -7,7 +7,7 @@ import { Header } from '@/components/layout/Header';
 import { Toaster } from "@/components/ui/toaster";
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset } from '@/components/ui/sidebar';
 import Link from 'next/link';
-import { UtensilsCrossed, Home, Camera, Users, ChefHat, Search, Trophy, Bell, Star } from 'lucide-react';
+import { UtensilsCrossed, Home, Camera, Users, ChefHat, Search, Trophy, Bell, Star, Bean } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 const navItems = [
@@ -16,6 +16,7 @@ const navItems = [
   { href: '/family-meal', label: 'Family Meal', icon: Users },
   { href: '/cooking-coach', label: 'Cooking Coach', icon: ChefHat },
   { href: '/lookup', label: 'Ingredient Lookup', icon: Search },
+  { href: '/protein-per-rupee', label: 'Protein-per-Rupee', icon: Bean },
   { href: '/achievements', label: 'Achievements', icon: Trophy },
   { href: '/challenges', label: 'Challenges', icon: Star },
   { href: '/reminders', label: 'Reminders', icon: Bell },
