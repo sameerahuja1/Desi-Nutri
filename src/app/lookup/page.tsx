@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -113,14 +114,14 @@ export default function IngredientLookupPage() {
                             colorClass="bg-primary/10"
                         />
                         <MacroCard 
-                            icon={<Droplets className="h-8 w-8 text-yellow-500" />}
+                            icon={<Flame className="h-8 w-8 text-yellow-500" />}
                             label="Carbs"
                             value={result.macros.carbs}
                             unit="g"
                             colorClass="bg-yellow-500/10"
                         />
                         <MacroCard 
-                            icon={<Flame className="h-8 w-8 text-red-500" />}
+                            icon={<Droplets className="h-8 w-8 text-red-500" />}
                             label="Fat"
                             value={result.macros.fat}
                             unit="g"
