@@ -332,8 +332,8 @@ export default function AnalyzePage() {
                 <CardHeader>
                     <CardTitle>{analysis.mealName}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    {previewUrl && <Image src={previewUrl} alt={analysis.mealName} width={600} height={400} className="rounded-lg w-full object-cover aspect-video" />}
+                <CardContent className="p-0">
+                    {previewUrl && <Image src={previewUrl} alt={analysis.mealName} width={600} height={400} className="rounded-b-lg w-full object-cover aspect-video" />}
                 </CardContent>
             </Card>
             <div className="space-y-6">
@@ -422,3 +422,5 @@ export default function AnalyzePage() {
     </div>
   );
 }
+
+    
