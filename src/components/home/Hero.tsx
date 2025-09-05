@@ -27,7 +27,7 @@ export function Hero() {
             </div>
           </div>
           <Image
-            src="https://picsum.photos/800/600?random=20"
+            src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxoZWFsdGh5J2TIwZm9vZHxlbnwwfHx8fDE3NTcxMDE3Mjh8MA&ixlib=rb-4.1.0&q=80&w=1080"
             alt="Healthy Indian Meal"
             data-ai-hint="indian thali"
             width={800}
