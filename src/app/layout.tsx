@@ -6,7 +6,7 @@ import './globals.css';
 import { cn } from "@/lib/utils";
 import { Header } from '@/components/layout/Header';
 import { Toaster } from "@/components/ui/toaster";
-import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset } from '@/components/ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { UtensilsCrossed, Home, Camera, Users, ChefHat, Search, Trophy, Bell, Star, Bean } from 'lucide-react';
 import { usePathname } from 'next/navigation';
