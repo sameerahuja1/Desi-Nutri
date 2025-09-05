@@ -1,10 +1,10 @@
-<<<<<<< HEAD
+HEAD
 # Firebase Studio
 
 This is a NextJS starter in Firebase Studio.
 
 To get started, take a look at src/app/page.tsx.
-=======
+
 # Desi-Nutri
 A modern, data-driven nutrition and fitness platform tailored for Indian dietary habits and lifestyles. DesiNutri helps users seamlessly plan meals, track macros, and optimize supplement intake, specifically catering to regional Indian foods and preferences. Built using the latest technologies, it integrates real-time nutritional data, user-friendly meal planning tools, and personalized recommendations for fitness enthusiasts.
 
@@ -42,4 +42,4 @@ Anyone who wants to eat healthy, the Desi way!
 
 Contributions:
 Contributions are welcome! Check out the issues tab for ideas or submit a pull request to help expand the Indian food database or enhance features.
->>>>>>> fad3f63ce2cb3beb0871ff4e99aa495f04d1cac9
+fad3f63ce2cb3beb0871ff4e99aa495f04d1cac9
