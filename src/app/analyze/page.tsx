@@ -218,7 +218,7 @@ export default function AnalyzePage() {
   }
 
   return (
-    <div className="container mx-auto max-w-4xl py-8 px-4">
+    <div className="container mx-auto max-w-4xl py-4 px-4">
       {!analysis && !isLoading && (
          <Card className="shadow-lg">
           <CardHeader className="text-center">
@@ -320,14 +320,14 @@ export default function AnalyzePage() {
       )}
 
       {analysis && !isLoading && parsedMacros && (
-        <div className="space-y-8 animate-in fade-in-0 duration-500">
+        <div className="space-y-6 animate-in fade-in-0 duration-500">
            <div className="flex justify-between items-start">
             <h2 className="text-3xl font-bold font-headline">Nutrition Report</h2>
              <Button variant="outline" onClick={resetState}>
                 <RefreshCw className="mr-2 h-4 w-4" /> Analyze Another Meal
               </Button>
           </div>
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6">
             <Card className="shadow-lg">
                 <CardHeader>
                     <CardTitle>{analysis.mealName}</CardTitle>
@@ -336,7 +336,7 @@ export default function AnalyzePage() {
                     {previewUrl && <Image src={previewUrl} alt={analysis.mealName} width={600} height={400} className="rounded-lg w-full object-cover aspect-video" />}
                 </CardContent>
             </Card>
-            <div className="space-y-8">
+            <div className="space-y-6">
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle>Macros Breakdown</CardTitle>
@@ -422,5 +422,3 @@ export default function AnalyzePage() {
     </div>
   );
 }
-
-    
